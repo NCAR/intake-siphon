@@ -24,6 +24,11 @@ class THREDDSMergedSource(DataSourceMixin):
         Subcats to follow; include glob characters (*, ?) in here for matching.
     driver : str
         Select driver to access data. Choose from 'netcdf' and 'opendap'.
+    xarray_kwargs: dict
+        kwargs to be passed to xr.open_dataset
+    concat_kwargs: dict
+        kwargs to be passed to xr.concat() filled by files opened by xr.open_dataset
+        previously
     progressbar : bool
         If True, will print a progress bar. Requires `tqdm <https://github.com/tqdm/tqdm>`__
         to be installed.
@@ -58,7 +63,14 @@ class THREDDSMergedSource(DataSourceMixin):
     partition_access = True
 
     def __init__(
-        self, url, path, driver='opendap', progressbar=True, xarray_kwargs={}, metadata=None
+        self,
+        url,
+        path,
+        driver='opendap',
+        progressbar=True,
+        xarray_kwargs={},
+        concat_kwargs=None,
+        metadata=None,
     ):
 
         super(THREDDSMergedSource, self).__init__(metadata=metadata)
@@ -68,6 +80,7 @@ class THREDDSMergedSource(DataSourceMixin):
         self.path = path
         self.driver = driver
         self.xarray_kwargs = xarray_kwargs
+        self.concat_kwargs = concat_kwargs
         self._ds = None
         self.progressbar = progressbar
         if self.progressbar and tqdm is None:
@@ -96,7 +109,10 @@ class THREDDSMergedSource(DataSourceMixin):
                 ]
             else:
                 data = [ds(xarray_kwargs=self.xarray_kwargs).to_dask() for ds in _match(cat, path)]
-            self._ds = xr.combine_by_coords(data, combine_attrs='override')
+            if self.concat_kwargs:
+                self._ds = xr.concat(data, **self.concat_kwargs)
+            else:
+                self._ds = xr.combine_by_coords(data, combine_attrs='override')
 
 
 def _match(cat, patterns):

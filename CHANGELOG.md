@@ -5,6 +5,7 @@
 ### Features
 
 - Allow `xarray_kwargs` for :py:class:`~intake_thredds.THREDDSMergedSource` [#32](https://github.com/NCAR/intake-thredds/pull/32) ([@aaronspring](https://github.com/aaronspring))
+- Allow `concat_kwargs` for :py:class:`~intake_thredds.THREDDSMergedSource` [#34](https://github.com/NCAR/intake-thredds/pull/34) ([@aaronspring](https://github.com/aaronspring))
 
 ## Intake-thredds v2021.2.17
 

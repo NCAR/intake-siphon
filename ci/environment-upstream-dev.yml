@@ -17,6 +17,7 @@ dependencies:
   - pytest-xdist
   - tqdm
   - xarray
+  - cfgrib
   - pip:
       - git+https://github.com/intake/intake.git
       - git+https://github.com/Unidata/siphon.git

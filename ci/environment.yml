@@ -19,3 +19,4 @@ dependencies:
   - siphon
   - tqdm
   - xarray
+  - cfgrib

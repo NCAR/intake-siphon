@@ -102,7 +102,7 @@ def test_THREDDSMergedSource_simplecache_fails_opendap(THREDDSMergedSource_cat_s
 @pytest.mark.parametrize('driver', ['netcdf', 'opendap'])
 @pytest.mark.parametrize('decode_times', [True, False])
 def test_THREDDSMergedSource_xarray_kwargs(THREDDSMergedSource_cat_short_url, driver, decode_times):
-    """Test xarray_kwargs."""
+    """Test THREDDSMergedSource with xarray_kwargs."""
     ds = intake.open_thredds_merged(
         'https://psl.noaa.gov/thredds/catalog.xml',
         [
@@ -119,3 +119,25 @@ def test_THREDDSMergedSource_xarray_kwargs(THREDDSMergedSource_cat_short_url, dr
         assert 'units' not in ds.time.attrs
     else:
         assert 'units' in ds.time.attrs
+
+
+def test_concat_dim():
+    """Test THREDDSMergedSource with concat_dim. Requires multiple files with same
+    other coords to be concatinated along new dimension specified by concat_dim.
+    Here get two ensemble members initialized 20200831 00:00 at 15.5 days = 372h"""
+    url = 'simplecache::https://www.ncei.noaa.gov/thredds/catalog/model-gefs-003/202008/20200831/catalog.xml'
+    ds = intake.open_thredds_merged(
+        url,
+        ['NCEP gens-a Grid 3 Member-Forecast 1[1-2]*-372 for 2020-08-31 00:00*'],
+        driver='netcdf',
+        xarray_kwargs=dict(
+            engine='cfgrib',
+            backend_kwargs=dict(
+                filter_by_keys={'typeOfLevel': 'heightAboveGround', 'shortName': '2t'}
+            ),
+        ),
+        concat_kwargs=dict(dim='number'),
+    ).to_dask()
+    assert 'number' in ds.dims
+    assert 11 in ds.number
+    assert 12 in ds.number
